@@ -29,6 +29,6 @@ docker-compose up -d
 ```bash
 [./mvnw spring-boot:run](http://localhost:8081/swagger-ui.html)
 ```
-### 4. Ejecutar el TEST (en este test se hace la prueba de concurrencia solicitada, con 20 compradores intentando comprar al mismo tiempo un producto de sólo 15 de stock) 
+### 4. Ejecutar el TEST (en este test se hace la prueba de concurrencia solicitada, con 20 compradores intentando comprar al mismo tiempo un producto de sólo 5 unidades en stock) 
 
 

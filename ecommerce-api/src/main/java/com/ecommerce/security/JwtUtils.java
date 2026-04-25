@@ -15,8 +15,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-@Slf4j
+
 public class JwtUtils {
+    
+    
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;

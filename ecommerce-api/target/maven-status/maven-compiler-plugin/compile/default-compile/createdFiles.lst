@@ -1,7 +1,0 @@
-com\ecommerce\entity\Product.class
-com\ecommerce\entity\OrderItem.class
-com\ecommerce\entity\Order$Status.class
-com\ecommerce\entity\Order.class
-com\ecommerce\entity\User.class
-com\ecommerce\entity\User$Role.class
-com\ecommerce\repository\UserRepository.class

@@ -12,12 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final AuditService auditService;
 
+    public ProductService(ProductRepository productRepository, AuditService auditService) {
+        this.productRepository = productRepository;
+        this.auditService = auditService;
+    }
+    
     public List<Dtos.ProductResponse> findAll() {
         return productRepository.findAllByActiveTrue()
                 .stream()

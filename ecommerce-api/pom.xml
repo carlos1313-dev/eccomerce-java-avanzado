@@ -76,10 +76,11 @@
 
         <!-- Lombok -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.46</version>
+    <scope>compile</scope>
+</dependency>
 
         <!-- Test -->
         <dependency>
@@ -105,12 +106,15 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>
+                    
+                            <annotationProcessorPaths>
+                                <annotationProcessorPath>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                            <version>1.18.46</version>
+                            </annotationProcessorPath>
+                            </annotationProcessorPaths>
+                        
                 </configuration>
             </plugin>
         </plugins>

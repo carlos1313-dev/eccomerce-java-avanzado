@@ -8,9 +8,8 @@ import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.repository.OrderRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.repository.UserRepository;
-import com.ecommerce.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -18,11 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
 
 @Service
-
 public class OrderService {
     
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
@@ -38,8 +35,6 @@ public class OrderService {
         this.userRepository = userRepository;
         this.auditService = auditService;
     }
-    
-    
 
     /**
      * CONCURRENCIA - Estrategia de control de sobreventa:
@@ -76,48 +71,51 @@ public class OrderService {
                         .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)))
                 .toList();
 
-        // Construimos los ítems y validamos stock
-        List<OrderItem> items = request.items().stream()
-                .map(itemReq -> {
-                    Product product = lockedProducts.stream()
-                            .filter(p -> p.getId().equals(itemReq.productId()))
-                            .findFirst()
-                            .orElseThrow();
-
-                    try {
-                        product.decreaseStock(itemReq.quantity());
-                    } catch (IllegalStateException e) {
-                        throw new InsufficientStockException(e.getMessage());
-                    }
-
-                    BigDecimal subtotal = product.getPrice()
-                            .multiply(BigDecimal.valueOf(itemReq.quantity()));
-
-                    return OrderItem.builder()
-                            .product(product)
-                            .quantity(itemReq.quantity())
-                            .unitPrice(product.getPrice())
-                            .subtotal(subtotal)
-                            .build();
-                })
-                .toList();
-
-        // Calculamos el total usando Streams
-        BigDecimal total = items.stream()
-                .map(OrderItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        // PRIMERO creamos la Order (sin items aún)
         Order order = Order.builder()
                 .user(user)
-                .total(total)
+                .total(BigDecimal.ZERO) // Se calculará después
+                .items(new ArrayList<>()) // Inicializamos la lista vacía
                 .build();
-        order = orderRepository.save(order);
 
-        // Asignamos la referencia a la orden en cada ítem
-        final Order savedOrder = order;
-        items.forEach(item -> item.setOrder(savedOrder));
-        savedOrder.setItems(items);
-        orderRepository.save(savedOrder);
+        // Construimos los ítems YA con la referencia a la Order
+        BigDecimal total = BigDecimal.ZERO;
+        List<OrderItem> items = new ArrayList<>();
+
+        for (Dtos.OrderItemRequest itemReq : request.items()) {
+            Product product = lockedProducts.stream()
+                    .filter(p -> p.getId().equals(itemReq.productId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            try {
+                product.decreaseStock(itemReq.quantity());
+            } catch (IllegalStateException e) {
+                throw new InsufficientStockException(e.getMessage());
+            }
+
+            BigDecimal subtotal = product.getPrice()
+                    .multiply(BigDecimal.valueOf(itemReq.quantity()));
+
+            // Creamos el OrderItem CON la referencia a la Order
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)  // ← Asignamos la Order AQUÍ
+                    .product(product)
+                    .quantity(itemReq.quantity())
+                    .unitPrice(product.getPrice())
+                    .subtotal(subtotal)
+                    .build();
+
+            items.add(orderItem);
+            total = total.add(subtotal);
+        }
+
+        // Actualizamos el total y los items en la Order
+        order.setTotal(total);
+        order.setItems(items);
+
+        // Guardamos la Order (CascadeType.ALL guardará los Items automáticamente)
+        Order savedOrder = orderRepository.save(order);
 
         auditService.logSuccess("CREATE_ORDER", "ORDER", savedOrder.getId(), userEmail,
                 "Orden creada con %d ítem(s), total: %s".formatted(items.size(), total));

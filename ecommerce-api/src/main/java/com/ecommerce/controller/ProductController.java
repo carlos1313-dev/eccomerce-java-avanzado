@@ -18,11 +18,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
 @Tag(name = "Productos", description = "Gestión de productos e inventario")
 public class ProductController {
 
     private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     @Operation(summary = "Listar todos los productos activos")

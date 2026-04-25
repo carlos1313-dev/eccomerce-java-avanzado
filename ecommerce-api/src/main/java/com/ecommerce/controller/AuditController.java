@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/audit")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Auditoría", description = "Registro de eventos del sistema (solo ADMIN)")
 @SecurityRequirement(name = "bearerAuth")
@@ -22,6 +21,10 @@ public class AuditController {
 
     private final AuditLogRepository auditLogRepository;
 
+    public AuditController(AuditLogRepository auditLogRepository) {
+        this.auditLogRepository = auditLogRepository;
+    }
+    
     @GetMapping
     @Operation(summary = "Obtener todos los logs de auditoría")
     public ResponseEntity<List<AuditLog>> getAll() {

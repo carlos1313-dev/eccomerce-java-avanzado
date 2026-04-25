@@ -6,9 +6,12 @@ import com.ecommerce.entity.AuditLog;
 import com.ecommerce.entity.User;
 import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.repository.UserRepository;
+import com.ecommerce.security.JwtAuthenticationFilter;
 import com.ecommerce.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,9 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
+
 public class AuthService {
+    
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,6 +34,15 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final AuditService auditService;
 
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserDetailsService userDetailsService, JwtUtils jwtUtils, AuditService auditService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.jwtUtils = jwtUtils;
+        this.auditService = auditService;
+    }
+    
     @Transactional
     public Dtos.UserResponse register(Dtos.RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {

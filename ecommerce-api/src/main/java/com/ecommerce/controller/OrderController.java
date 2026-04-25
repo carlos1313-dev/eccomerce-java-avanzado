@@ -18,13 +18,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 @Tag(name = "Órdenes", description = "Gestión de órdenes de compra")
 @SecurityRequirement(name = "bearerAuth")
 public class OrderController {
 
     private final OrderService orderService;
 
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+    
     @PostMapping
     @Operation(summary = "Crear una nueva orden de compra")
     public ResponseEntity<Dtos.OrderResponse> createOrder(

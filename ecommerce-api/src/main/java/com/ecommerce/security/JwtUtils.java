@@ -15,10 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-
 public class JwtUtils {
-    
-    
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;

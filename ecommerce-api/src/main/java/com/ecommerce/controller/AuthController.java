@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @Tag(name = "Autenticación", description = "Registro e inicio de sesión de usuarios")
 public class AuthController {
 
     private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Registrar un nuevo usuario")

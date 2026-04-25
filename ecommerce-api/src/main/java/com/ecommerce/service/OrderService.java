@@ -8,6 +8,7 @@ import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.repository.OrderRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.repository.UserRepository;
+import com.ecommerce.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,16 +18,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
+
 public class OrderService {
+    
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, AuditService auditService) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.auditService = auditService;
+    }
+    
+    
 
     /**
      * CONCURRENCIA - Estrategia de control de sobreventa:

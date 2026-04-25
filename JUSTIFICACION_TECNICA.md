@@ -9,13 +9,13 @@
 
 ### Problema: sobreventa
 
-Cuando múltiples clientes intentan comprar el mismo producto simultáneamente, se produce una condición de carrera (_race condition_). Si dos hilos leen el stock = 1 al mismo tiempo, ambos pueden considerar que hay inventario disponible y proceder con la venta, resultando en un stock final de -1 (sobreventa).
+Cuando múltiples clientes intentan comprar el mismo producto simultáneamente, se produce una condición de carrera. Si dos hilos leen el stock = 1 al mismo tiempo, ambos pueden considerar que hay inventario disponible y proceder con la venta, resultando en un stock final de -1 (sobreventa).
 
 ### Estrategia elegida: Bloqueo Pesimista (Pessimistic Locking)
 
 Se eligió **control pesimista** sobre el control optimista por las siguientes razones:
 
-En un escenario de e-commerce donde decenas de usuarios pueden comprar el mismo producto popular al mismo tiempo, la tasa de conflictos sería alta. El bloqueo optimista generaría muchos `OptimisticLockException` que el cliente tendría que reintentar, degradando la experiencia. El bloqueo pesimista hace que los hilos esperen en cola, garantizando que cada transacción vea el stock real. Por ejemplo, en el test, van 15 personas al mismo tiempo a comprar un mismo producto, lo que hace este bloqueo es generar una cola con las peticiones, se vende un producto solicitado por muchos, y sigue el próximo en la cola hasta que se agoten.
+En un escenario de e-commerce donde decenas de usuarios pueden comprar el mismo producto popular al mismo tiempo, la tasa de conflictos sería alta. El bloqueo optimista generaría muchos OptimisticLockException que el cliente tendría que reintentar, degradando la experiencia. El bloqueo pesimista hace que los hilos esperen en cola, garantizando que cada transacción vea el stock real. Por ejemplo, en el test, van 15 personas al mismo tiempo a comprar un mismo producto, lo que hace este bloqueo es generar una cola con las peticiones, se vende un producto solicitado por muchos, y sigue el próximo en la cola hasta que se agoten.
 
 ### Prevención de Deadlocks
 
@@ -51,9 +51,9 @@ Las contraseñas se almacenan con BCrypt (factor de costo 10 por defecto). BCryp
 
 ### Autorización por roles (RBAC)
 
-Se definen dos roles: `ADMIN` y `CLIENTE`. La autorización se aplica en dos niveles:
+Se definen dos roles: ADMIN y CLIENTE. La autorización se aplica en dos niveles:
 
-1. A nivel de ruta en `SecurityConfig`: reglas globales por patrón de URL y método HTTP.
+1. A nivel de ruta en SecurityConfig: reglas globales por patrón de URL y método HTTP.
 2. A nivel de método con @PreAuthorize("hasRole('ADMIN')"): más granular y cercano a la lógica de negocio.
 
 Adicionalmente, en OrderService.getOrderById() se verifica programáticamente que un CLIENTE solo pueda acceder a sus propias órdenes, incluso si la ruta es correcta. Los intentos de acceso no autorizado se registran en auditoría.
